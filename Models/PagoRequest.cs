@@ -1,3 +1,5 @@
+namespace CarvaVault_API.Models;
+
 public class PagoRequest
 {
     public string Remitente { get; set; } = string.Empty;
