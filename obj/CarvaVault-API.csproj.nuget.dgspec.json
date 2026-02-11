@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\carva\\Desktop\\CarvaVault\\carva-vault\\CarvaVault-API\\CarvaVault-API.csproj": {}
+    "C:\\Users\\carva\\Desktop\\CarvaVault\\carva-vault\\carvaVault-API\\CarvaVault-API.csproj": {}
   },
   "projects": {
-    "C:\\Users\\carva\\Desktop\\CarvaVault\\carva-vault\\CarvaVault-API\\CarvaVault-API.csproj": {
+    "C:\\Users\\carva\\Desktop\\CarvaVault\\carva-vault\\carvaVault-API\\CarvaVault-API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\carva\\Desktop\\CarvaVault\\carva-vault\\CarvaVault-API\\CarvaVault-API.csproj",
+        "projectUniqueName": "C:\\Users\\carva\\Desktop\\CarvaVault\\carva-vault\\carvaVault-API\\CarvaVault-API.csproj",
         "projectName": "CarvaVault-API",
-        "projectPath": "C:\\Users\\carva\\Desktop\\CarvaVault\\carva-vault\\CarvaVault-API\\CarvaVault-API.csproj",
+        "projectPath": "C:\\Users\\carva\\Desktop\\CarvaVault\\carva-vault\\carvaVault-API\\CarvaVault-API.csproj",
         "packagesPath": "C:\\Users\\carva\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\carva\\Desktop\\CarvaVault\\carva-vault\\CarvaVault-API\\obj\\",
+        "outputPath": "C:\\Users\\carva\\Desktop\\CarvaVault\\carva-vault\\carvaVault-API\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\carva\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -50,6 +50,22 @@
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
               "version": "[10.0.2, )"
+            },
+            "Microsoft.EntityFrameworkCore.Design": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[10.0.3, )"
+            },
+            "Microsoft.EntityFrameworkCore.Tools": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[10.0.3, )"
+            },
+            "Npgsql.EntityFrameworkCore.PostgreSQL": {
+              "target": "Package",
+              "version": "[10.0.0, )"
             }
           },
           "imports": [

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using CarvaVault_API.Models;
-using System.Collections.Concurrent; // Usamos Concurrent para evitar choques de hilos
+using CarvaVault_API.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace CarvaVault_API.Controllers;
 
@@ -8,73 +9,75 @@ namespace CarvaVault_API.Controllers;
 [Route("api/[controller]")]
 public class PagosController : ControllerBase
 {
-    // 1. GESTIÓN DE USUARIOS (Simulando base de datos)
-    // Aquí agregas a tus clientes cuando te paguen la suscripción
-    private static readonly Dictionary<string, string> Usuarios = new()
+    private readonly AppDbContext _context;
+
+    public PagosController(AppDbContext context)
     {
-        { "admin", "admin123" },       // Tu acceso maestro
-        { "ruta66", "hamburguesa" },   // Cliente 1
-        { "donjediondo", "sopita" },   // Cliente 2
-        { "wil", "millonario" }        // Tus pruebas
-    };
+        _context = context;
+    }
 
-    // 2. LA BÓVEDA MULTI-TENANT
-    // Estructura: "ID_CLIENTE" -> [Lista de Pagos]
-    private static readonly ConcurrentDictionary<string, List<PagoRequest>> Bovedas = new();
-
-    // LOGIN: El Frontend llama a esto para entrar
+    // --- LOGIN ---
     [HttpPost("login")]
-    public IActionResult Login([FromBody] LoginRequest req)
+    public async Task<IActionResult> Login([FromBody] LoginRequest req)
     {
-        if (Usuarios.TryGetValue(req.Usuario.ToLower(), out var passReal) && passReal == req.Password)
+        // CAMBIO CLAVE: Usamos req.Username en vez de req.Usuario
+        var user = await _context.Usuarios
+            .FirstOrDefaultAsync(u => u.Username.ToLower() == req.Username.ToLower() && u.Password == req.Password);
+
+        if (user != null)
         {
-            // Si entra, le devolvemos su ID para que el Front sepa qué pedir
             return Ok(new { 
-                mensaje = "Acceso Concedido", 
-                token = Guid.NewGuid().ToString(), // Simulamos seguridad pro
-                usuario = req.Usuario.ToLower() 
+                mensaje = "Bienvenido", 
+                usuario = user.Username, // Devolvemos el nombre real
+                rol = user.Rol 
             });
         }
-        return Unauthorized(new { mensaje = "Credenciales Inválidas" });
+        return Unauthorized(new { mensaje = "Credenciales incorrectas" });
     }
 
-    // VERIFICAR: La App Android llama a esto
+    // --- GUARDAR PAGO ---
     [HttpPost("verificar")]
-    public IActionResult RecibirPago([FromBody] PagoRequest pago)
+    public async Task<IActionResult> RecibirPago([FromBody] Pago pagoData)
     {
-        // 1. Seguridad Global (Tu llave maestra)
         if (!Request.Headers.TryGetValue("X-Carva-Key", out var key) || key != "Tu_Clave_Secreta_Barranquilla_2026")
-            return Unauthorized(new { mensaje = "Intruso detectado: Llave incorrecta" });
+            return Unauthorized(new { mensaje = "Llave maestra incorrecta" });
 
-        // 2. Normalizar ID del cliente
-        string clienteId = string.IsNullOrEmpty(pago.ClienteId) ? "generico" : pago.ClienteId.ToLower();
+        _context.Pagos.Add(pagoData);
+        await _context.SaveChangesAsync();
 
-        // 3. Crear la caja fuerte si es el primer pago de este cliente
-        if (!Bovedas.ContainsKey(clienteId))
-        {
-            Bovedas[clienteId] = new List<PagoRequest>();
-        }
-
-        // 4. Guardar el pago en SU caja
-        Bovedas[clienteId].Add(pago);
-
-        Console.WriteLine($"[SaaS] Pago de {pago.Monto:C} recibido para el cliente: {clienteId}");
-        return Ok(new { mensaje = $"Pago asegurado en la bóveda de {clienteId}" });
+        return Ok(new { mensaje = "Pago registrado en DB" });
     }
 
-    // HISTORIAL: El Frontend pide SUS datos
+    // --- HISTORIAL ---
     [HttpGet("historial/{clienteId}")]
-    public IActionResult ObtenerHistorial(string clienteId)
+    public async Task<IActionResult> ObtenerHistorial(string clienteId)
     {
-        string id = clienteId.ToLower();
-        
-        // Si la bóveda existe, devolvemos sus pagos. Si no, lista vacía.
-        if (Bovedas.TryGetValue(id, out var pagos))
-        {
-            // Devolvemos los más recientes primero
-            return Ok(pagos.OrderByDescending(p => p.Fecha));
-        }
-        
-        return Ok(new List<PagoRequest>());
+        var historial = await _context.Pagos
+            .Where(p => p.ClienteId.ToLower() == clienteId.ToLower())
+            .OrderByDescending(p => p.Fecha)
+            .ToListAsync();
+
+        return Ok(historial);
     }
+    
+    // --- CREAR USUARIO (SOLO PARA PRUEBAS INICIALES) ---
+    [HttpPost("crear-usuario")]
+    public async Task<IActionResult> CrearUsuario([FromBody] Usuario nuevoUser)
+    {
+        // Verificar si ya existe
+        var existe = await _context.Usuarios.AnyAsync(u => u.Username == nuevoUser.Username);
+        if (existe) return BadRequest("El usuario ya existe");
+
+        _context.Usuarios.Add(nuevoUser);
+        await _context.SaveChangesAsync();
+        return Ok(new { mensaje = $"Usuario {nuevoUser.Username} creado!" });
+    }
+}
+
+// --- DTO PARA EL LOGIN (DEFINIDO AQUÍ MISMO) ---
+public class LoginRequest
+{
+    // LE CAMBIAMOS EL NOMBRE AQUI PARA QUE NO CHOQUE
+    public string Username { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
 }
