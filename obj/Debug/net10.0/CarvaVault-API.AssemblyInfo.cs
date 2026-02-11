@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CarvaVault-API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+64bb6691aab26a487736ce39ce55d76e10eea047")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6f24a8e000ef7428366cfea1393e4da62643437b")]
 [assembly: System.Reflection.AssemblyProductAttribute("CarvaVault-API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CarvaVault-API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
